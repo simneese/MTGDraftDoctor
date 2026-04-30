@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MTG Draft Doctor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="section-label">Deck Building Tool for Limited Formats</p>
+          <h1>MTG Draft Doctor</h1>
+        </div>
+        <div class="topbar-tools">
+          <div class="mode-switch" role="group" aria-label="Input mode">
+            <button class="mode-button active" id="basicModeButton" type="button" aria-pressed="true">Basic</button>
+            <button class="mode-button" id="advancedModeButton" type="button" aria-pressed="false">Advanced</button>
+          </div>
+          <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">Dark Mode</button>
+          <div class="deck-status" id="deckStatus"></div>
+        </div>
+      </header>
+
+      <section class="panel advanced-panel" id="advancedPanel" hidden>
+        <div class="panel-heading">
+          <div>
+            <p class="section-label">Advanced Mode</p>
+            <h2>Card Search</h2>
+          </div>
+          <div class="panel-actions">
+            <button class="ghost-button" id="clearDeckButton" type="button">Clear Deck</button>
+          </div>
+        </div>
+        <div class="search-layout">
+          <div class="search-column">
+            <div class="set-filter">
+              <div class="set-filter-label">Set Filter</div>
+              <div class="set-token-input">
+                <div class="selected-set-tags" id="selectedSetTags"></div>
+                <input id="setSearchInput" type="search" autocomplete="off" placeholder="Add set..." aria-label="Search set name or code" />
+              </div>
+              <div class="set-suggestions" id="setSuggestions"></div>
+            </div>
+            <label class="search-box" for="cardSearchInput">
+              <span>Search Scryfall</span>
+              <input id="cardSearchInput" type="search" autocomplete="off" placeholder="Search for cards..." />
+            </label>
+            <div class="search-meta" id="searchMeta">Type at least two characters to search.</div>
+            <div class="search-results" id="searchResults"></div>
+          </div>
+          <div class="deck-column">
+            <div class="basic-land-builder">
+              <div class="deck-list-heading">
+                <strong>Additional Basic Lands</strong>
+              </div>
+              <label class="basic-land-input" for="advancedBasicLandsInput">
+                <span>Basic lands to add to deck total</span>
+                <input id="advancedBasicLandsInput" data-kind="advanced-basic-lands" type="number" min="0" value="0" />
+              </label>
+            </div>
+            <div class="deck-list-heading">
+              <strong>Advanced Deck</strong>
+              <span id="advancedDeckSummary">0 cards</span>
+            </div>
+            <div class="deck-list" id="advancedDeckList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel deck-preview-panel" id="deckPreviewPanel" hidden>
+        <div class="panel-heading">
+          <div>
+            <p class="section-label">Advanced Mode</p>
+            <h2>Deck Preview</h2>
+          </div>
+          <div class="panel-actions">
+            <button class="ghost-button" id="deckPreviewToggle" type="button" aria-expanded="false">Show Preview</button>
+          </div>
+        </div>
+        <div class="deck-preview-content" id="deckPreviewContent" hidden>
+          <div class="deck-preview-groups" id="deckPreviewGroups"></div>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="panel curve-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Mana Curve</h2>
+            </div>
+            <div class="panel-actions">
+              <button class="ghost-button" id="curveOptionsButton" type="button" aria-expanded="false">Options</button>
+              <button class="ghost-button" id="resetButton" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="options-panel" id="curveOptions" hidden>
+            <div class="options-heading">
+              <strong>Ideal Curve Ranges</strong>
+              <span>Adjust the target min and max for each bucket.</span>
+            </div>
+            <div class="range-editor" id="rangeEditor"></div>
+          </div>
+
+          <div class="curve-grid" id="curveInputs"></div>
+
+          <div class="chart-wrap">
+            <canvas id="curveChart" width="900" height="300" aria-label="Mana curve chart"></canvas>
+          </div>
+        </div>
+
+        <aside class="panel recommendations-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Recommendations</p>
+              <h2>Cuts And Adds</h2>
+            </div>
+          </div>
+          <div id="curveRecommendations" class="recommendation-list"></div>
+        </aside>
+      </section>
+
+      <section class="workspace lower-grid">
+        <div class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Mana Base</h2>
+            </div>
+          </div>
+          <div class="land-grid" id="landInputs"></div>
+        </div>
+
+        <div class="panel land-output-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Recommendations</p>
+              <h2>Suggested Basic Lands</h2>
+            </div>
+          </div>
+          <div id="landRecommendations" class="land-results"></div>
+        </div>
+      </section>
+    </main>
+    <div class="floating-card-preview" id="floatingCardPreview" hidden></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
