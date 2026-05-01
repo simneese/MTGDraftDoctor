@@ -32,3 +32,10 @@ MTG limited web based deck building tool for limited formats - can be used for b
 4. [optional] expand the deck preview to see how your cards are grouped based on mana cost. <img width="800" alt="image" src="https://github.com/user-attachments/assets/296cc6fd-8a6e-4a8a-9db5-2071818a181c" />
 5. Mana curve and mana base tools are automatically populated based on cards in your deck.
 6. Use recommendations to help decide what to cut or add to your deck.
+
+## About
+### Author
+My name is Simeon Neese. I'm a mechanical engineer and I started playing MTG with my friends in 2025. I attended my first prerelease when Secrets of Strixhaven came out, and it was the most fun I've had playing the game so far. But it got me thinking - as a newer player who still has a lot to learn about building a deck in limited formats, I would have loved to have had a tool to bring with me into the game that was super easy to use and could help me quickly make cuts and calculate how many basic lands I needed to grab for my deck. When you're on a timer, every minute counts. And so, MTG Draft Doctor was born!
+
+### Development
+This started out as a proof of concept [Excel workbook](https://github.com/simneese/MTGDraftDoctor/tree/main/Reference) where I worked out the formulas I would need for the land calculator. After that was done, I knew I wanted it to be a web tool so I could quickly pull it up on my phone and could even integrate the Scryfall card database so I could use specific cards rather than just put numbers in boxes. I was somewhat inspired by Salubrious Snail's [manabase tool](https://www.salubrioussnail.com/manabase-tool), which I use all the time for building commander decks. Some features I am tossing around are things like having multiple decks you can switch between, and in advanced mode having a sideboard option. I'm just having fun working on this tool for myself, and I hope other people will use it too!
