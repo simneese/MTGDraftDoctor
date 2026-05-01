@@ -19,6 +19,7 @@ const colors = [
 ];
 
 const defaults = {
+  theme: "light",
   mode: "basic",
   counts: {
     lands: 0,
@@ -52,13 +53,70 @@ const defaults = {
   deckPreviewOpen: false,
 };
 
-let state = structuredClone(defaults);
+const storageKey = "mtg-draft-doctor-state-v1";
+
+let state = loadPersistedState();
 let searchController = null;
 let searchTimer = null;
 let setSearchTimer = null;
 let allSets = [];
 let setsLoaded = false;
 let setLoadPromise = null;
+
+function mergeDefaults(defaultValue, savedValue) {
+  if (Array.isArray(defaultValue)) {
+    return Array.isArray(savedValue) ? savedValue : structuredClone(defaultValue);
+  }
+
+  if (defaultValue && typeof defaultValue === "object") {
+    const merged = structuredClone(defaultValue);
+    if (!savedValue || typeof savedValue !== "object" || Array.isArray(savedValue)) {
+      return merged;
+    }
+
+    Object.keys(merged).forEach((key) => {
+      merged[key] = mergeDefaults(merged[key], savedValue[key]);
+    });
+    return merged;
+  }
+
+  return savedValue === undefined ? defaultValue : savedValue;
+}
+
+function loadPersistedState() {
+  try {
+    const saved = window.localStorage.getItem(storageKey);
+    if (!saved) return structuredClone(defaults);
+
+    const parsed = JSON.parse(saved);
+    const restoredState = mergeDefaults(defaults, parsed);
+    if (restoredState.mode !== "advanced" && restoredState.mode !== "basic") {
+      restoredState.mode = defaults.mode;
+    }
+    if (restoredState.theme !== "dark" && restoredState.theme !== "light") {
+      restoredState.theme = defaults.theme;
+    }
+    return restoredState;
+  } catch (error) {
+    console.warn("Saved deck could not be restored.", error);
+    return structuredClone(defaults);
+  }
+}
+
+function persistState() {
+  try {
+    window.localStorage.setItem(storageKey, JSON.stringify(state));
+  } catch (error) {
+    console.warn("Deck progress could not be saved.", error);
+  }
+}
+
+function applyTheme() {
+  const isDark = state.theme === "dark";
+  document.body.dataset.theme = state.theme;
+  themeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
+  themeToggle.setAttribute("aria-pressed", String(isDark));
+}
 
 const searchPlaceholderCards = [
   "Lightning Strike",
@@ -271,6 +329,7 @@ function setMode(mode) {
   if (isAdvancedMode()) {
     deriveAdvancedInputs();
   }
+  persistState();
   render();
 }
 
@@ -937,6 +996,7 @@ function addCardToDeck(card) {
     state.advancedDeck.push({ card, quantity: 1 });
   }
   deriveAdvancedInputs();
+  persistState();
   render();
 }
 
@@ -946,6 +1006,7 @@ function changeCardQuantity(cardId, delta) {
   existing.quantity += delta;
   state.advancedDeck = state.advancedDeck.filter((entry) => entry.quantity > 0);
   deriveAdvancedInputs();
+  persistState();
   render();
 }
 
@@ -1008,6 +1069,7 @@ function addSetFilter(code) {
   if (!set || state.selectedSets.some((item) => item.code === code)) return;
   state.selectedSets.push(set);
   setSearchInput.value = "";
+  persistState();
   renderSelectedSets();
   renderSetSuggestions([]);
   searchScryfall(cardSearchInput.value);
@@ -1015,6 +1077,7 @@ function addSetFilter(code) {
 
 function removeSetFilter(code) {
   state.selectedSets = state.selectedSets.filter((set) => set.code !== code);
+  persistState();
   renderSelectedSets();
   searchScryfall(cardSearchInput.value);
 }
@@ -1089,6 +1152,7 @@ function render() {
   if (isAdvancedMode()) {
     deriveAdvancedInputs();
   }
+  applyTheme();
   renderModeControls();
   renderSelectedSets();
   renderAdvancedDeck();
@@ -1144,13 +1208,17 @@ document.addEventListener("input", (event) => {
     deriveAdvancedInputs();
   }
 
+  persistState();
   updateDynamicViews();
 });
 
 document.querySelector("#resetButton").addEventListener("click", () => {
   const mode = state.mode;
+  const theme = state.theme;
   state = structuredClone(defaults);
   state.mode = mode;
+  state.theme = theme;
+  persistState();
   render();
 });
 
@@ -1166,12 +1234,14 @@ clearDeckButton.addEventListener("click", () => {
   state.advancedDeck = [];
   state.advancedBasicLands = 0;
   deriveAdvancedInputs();
+  persistState();
   render();
 });
 
 deckPreviewToggle.addEventListener("click", () => {
   state.deckPreviewOpen = !state.deckPreviewOpen;
   hideFloatingPreview();
+  persistState();
   renderDeckPreview();
 });
 
@@ -1201,6 +1271,7 @@ deckPreviewGroups.addEventListener("focusout", (event) => {
 
 window.addEventListener("scroll", hideFloatingPreview, { passive: true });
 window.addEventListener("resize", hideFloatingPreview);
+window.addEventListener("beforeunload", persistState);
 
 cardSearchInput.addEventListener("input", () => {
   window.clearTimeout(searchTimer);
@@ -1249,10 +1320,9 @@ curveOptionsButton.addEventListener("click", () => {
 });
 
 themeToggle.addEventListener("click", () => {
-  const isDark = document.body.dataset.theme === "dark";
-  document.body.dataset.theme = isDark ? "light" : "dark";
-  themeToggle.textContent = isDark ? "Dark Mode" : "Light Mode";
-  themeToggle.setAttribute("aria-pressed", String(!isDark));
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  applyTheme();
+  persistState();
   drawChart();
 });
 
