@@ -943,6 +943,10 @@ canvas {
   background-image: url("https://svgs.scryfall.io/card-symbols/G.svg");
 }
 
+.mana-C {
+  background-image: url("https://svgs.scryfall.io/card-symbols/C.svg");
+}
+
 .color-row input,
 .nonbasic-row input {
   background: var(--panel);

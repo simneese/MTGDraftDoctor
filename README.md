@@ -7,8 +7,8 @@ MTG limited web based deck building tool for limited formats - can be used for b
 2. Input number of cards in your deck for each mana cost bucket.
 3. Recommended adds or cuts appear to the side of your mana curve.
 4. Count the number of nonbasic lands in your deck and input that number into the mana base tool.
-5. Count the total number of each color pip which appears in the cost of the cards. Input them into the mana base tool.
-6. Count the amount of mana provided by your nonbasic lands and input that into the mana base tool.
+5. Count the total number of each colored or colorless mana pip which appears in the cost of the cards. Input them into the mana base tool.
+6. Count the amount of colored or colorless mana provided by your nonbasic lands and input that into the mana base tool.
 7. Recommended basic land counts for your deck appear to the side of the mana base tool.
 
 ### Advanced

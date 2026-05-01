@@ -16,6 +16,7 @@ const colors = [
   { symbol: "B", land: "Swamps" },
   { symbol: "R", land: "Mountains" },
   { symbol: "G", land: "Forests" },
+  { symbol: "C", land: "Wastes" },
 ];
 
 const defaults = {
@@ -45,6 +46,7 @@ const defaults = {
     B: { cost: 0, duals: 0 },
     R: { cost: 0, duals: 0 },
     G: { cost: 0, duals: 0 },
+    C: { cost: 0, duals: 0 },
   },
   nonbasicLands: 0,
   advancedDeck: [],
@@ -138,6 +140,7 @@ const searchPlaceholderCards = [
   "Swamp",
   "Mountain",
   "Forest",
+  "Wastes",
 ];
 
 const curveInputs = document.querySelector("#curveInputs");
@@ -245,10 +248,18 @@ function getManaCost(card) {
     .join("");
 }
 
-function countColoredManaSymbols(manaCost) {
-  const counts = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+function countManaSymbols(manaCost) {
+  const counts = { W: 0, U: 0, B: 0, R: 0, G: 0, C: 0 };
   const symbols = manaCost.match(/\{[^}]+\}/g) || [];
   symbols.forEach((symbol) => {
+    const value = symbol.slice(1, -1);
+    if (/^\d+$/.test(value) || value === "X") {
+      return;
+    }
+    if (value === "C") {
+      counts.C += 1;
+      return;
+    }
     colors.forEach((color) => {
       if (symbol.includes(color.symbol)) {
         counts[color.symbol] += 1;
@@ -313,7 +324,7 @@ function deriveAdvancedInputs() {
       derivedCounts[bucket] += quantity;
     }
 
-    const pips = countColoredManaSymbols(getManaCost(card));
+    const pips = countManaSymbols(getManaCost(card));
     colors.forEach((color) => {
       derivedMana[color.symbol].cost += pips[color.symbol] * quantity;
     });
@@ -528,6 +539,7 @@ function renderLandInputs() {
     `;
     landInputs.append(row);
   });
+
 }
 
 function renderStatus() {
@@ -638,7 +650,7 @@ function renderLandRecommendations() {
     landRecommendations.innerHTML = `
       <div class="recommendation warn">
         <strong>Count Mana Pips</strong>
-        <span>Enter the colored mana symbols from your spell costs to get suggested basic lands.</span>
+        <span>Enter the colored and colorless mana symbols from your spell costs to get suggested basic lands.</span>
       </div>
       <div class="formula-note">Total Basics: <strong>0</strong>.</div>
     `;
@@ -651,7 +663,7 @@ function renderLandRecommendations() {
         <div class="land-result">
           <div>
             <strong>${row.land}</strong>
-            <div class="land-name">${row.symbol}: ${row.cost} cost symbols, ${row.duals} nonbasic-land color sources</div>
+            <div class="land-name">${row.symbol}: ${row.cost} cost symbols, ${row.duals} nonbasic-land sources</div>
           </div>
           <div class="land-count">${row.count}</div>
         </div>
@@ -661,7 +673,7 @@ function renderLandRecommendations() {
 
   landRecommendations.insertAdjacentHTML(
     "beforeend",
-    `<div class="formula-note">Total Basics: <strong>${totalBasics}</strong>. ${landCount} land slots, ${totalNonbasics} nonbasic. Color demand is weighted by costs; nonbasics reduce basic slots.</div>`,
+    `<div class="formula-note">Total Basics: <strong>${totalBasics}</strong>. ${landCount} land slots, ${totalNonbasics} nonbasic. Colored and colorless demand is weighted by costs; nonbasics reduce basic slots.</div>`,
   );
 }
 
