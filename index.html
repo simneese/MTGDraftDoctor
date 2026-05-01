@@ -14,6 +14,18 @@
           <h1>MTG Draft Doctor</h1>
         </div>
         <div class="topbar-tools">
+          <div class="help-menu">
+            <button class="help-button" type="button" aria-describedby="helpPopover" aria-label="How to use MTG Draft Doctor">?</button>
+            <div class="help-popover" id="helpPopover" role="tooltip">
+              <strong>MTG Draft Doctor</strong>
+              <span>Deck-building help for Limited formats.</span>
+              <ul>
+                <li><b>Basic:</b> enter curve counts, colored mana symbols, and nonbasic lands manually.</li>
+                <li><b>Advanced:</b> search Scryfall, add cards to your deck, then add extra basic lands.</li>
+                <li>Review curve flags, suggested cuts/adds, and basic land recommendations.</li>
+              </ul>
+            </div>
+          </div>
           <div class="mode-switch" role="group" aria-label="Input mode">
             <button class="mode-button active" id="basicModeButton" type="button" aria-pressed="true">Basic</button>
             <button class="mode-button" id="advancedModeButton" type="button" aria-pressed="false">Advanced</button>
@@ -142,6 +154,11 @@
           <div id="landRecommendations" class="land-results"></div>
         </div>
       </section>
+
+      <footer class="app-footer">
+        <span>MTG Draft Doctor by Simeon Neese</span>
+        <a href="https://github.com/simneese/MTGDraftDoctor" target="_blank" rel="noreferrer">GitHub</a>
+      </footer>
     </main>
     <div class="floating-card-preview" id="floatingCardPreview" hidden></div>
 

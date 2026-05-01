@@ -158,6 +158,71 @@ h2 {
   color: #2a2418;
 }
 
+.help-menu {
+  position: relative;
+}
+
+.help-button {
+  align-items: center;
+  background: rgba(244, 234, 211, 0.12);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: #f7efd9;
+  cursor: help;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.help-button:hover,
+.help-button:focus-visible {
+  background: #e7d3a0;
+  color: #2a2418;
+  outline: 0;
+}
+
+.help-popover {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  display: none;
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 12px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: min(330px, calc(100vw - 24px));
+  z-index: 120;
+}
+
+.help-popover strong,
+.help-popover span {
+  display: block;
+}
+
+.help-popover span {
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.help-popover ul {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+.help-menu:hover .help-popover,
+.help-menu:focus-within .help-popover {
+  display: block;
+}
+
 .status-item {
   min-width: 54px;
 }
@@ -943,6 +1008,28 @@ canvas {
   padding: 9px;
 }
 
+.app-footer {
+  align-items: center;
+  color: #d5c195;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 10px;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+
+.app-footer a {
+  color: #f7efd9;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.app-footer a:hover,
+.app-footer a:focus-visible {
+  text-decoration: underline;
+}
+
 @media (max-width: 860px) {
   .topbar,
   .workspace,
@@ -1016,8 +1103,18 @@ canvas {
   }
 
   .mode-switch,
+  .help-menu,
   .theme-toggle {
     flex: 1 1 auto;
+  }
+
+  .help-button {
+    width: 100%;
+  }
+
+  .help-popover {
+    left: 0;
+    right: auto;
   }
 
   .mode-button,
