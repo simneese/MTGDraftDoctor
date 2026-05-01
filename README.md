@@ -1,5 +1,5 @@
 # MTG Draft Doctor
-MTG limited formats deck building tool - can be used for building draft or sealed decks. Analyze your current mana curve and get suggestions for cards to cut or add based on mana value! Then, get recommended basic lands to add to your deck based on cost pip counts.
+MTG limited formats web based deck building tool - can be used for building draft or sealed decks. Analyze your current mana curve and get suggestions for cards to cut or add based on mana value! Then, get recommended basic lands to add to your deck based on cost pip counts.
 
 ## How-To
 ### Basic
@@ -18,6 +18,3 @@ MTG limited formats deck building tool - can be used for building draft or seale
 4. [optional] expand the deck preview to see how your cards are grouped based on mana cost.
 5. Mana curve and mana base tools are automatically populated based on cards in your deck.
 6. Use recommendations to help decide what to cut or add to your deck.
-
-## Credits
-Owner: [@simneese](https://github.com/simneese)
