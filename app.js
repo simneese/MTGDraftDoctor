@@ -64,6 +64,10 @@ let setSearchTimer = null;
 let allSets = [];
 let setsLoaded = false;
 let setLoadPromise = null;
+let scryfallLastRequestAt = 0;
+let scryfallRequestQueue = Promise.resolve();
+const scryfallRequestDelay = 125;
+const scryfallResponseCache = new Map();
 
 function mergeDefaults(defaultValue, savedValue) {
   if (Array.isArray(defaultValue)) {
@@ -186,7 +190,55 @@ function setRandomSearchPlaceholder() {
 }
 
 function scryfallHeaders() {
+  // Browser fetch cannot set User-Agent; the browser supplies that forbidden header.
   return { Accept: "application/json;q=0.9,*/*;q=0.8" };
+}
+
+function scryfallFetch(url, options = {}) {
+  scryfallRequestQueue = scryfallRequestQueue
+    .catch(() => {})
+    .then(async () => {
+      const elapsed = Date.now() - scryfallLastRequestAt;
+      const delay = Math.max(0, scryfallRequestDelay - elapsed);
+      if (delay) {
+        await new Promise((resolve) => window.setTimeout(resolve, delay));
+      }
+      scryfallLastRequestAt = Date.now();
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...scryfallHeaders(),
+          ...(options.headers || {}),
+        },
+      });
+    });
+
+  return scryfallRequestQueue;
+}
+
+async function scryfallJson(url, options = {}) {
+  const cacheKey = options.method || options.signal ? null : url.toString();
+  if (cacheKey && scryfallResponseCache.has(cacheKey)) {
+    return scryfallResponseCache.get(cacheKey);
+  }
+
+  const response = await scryfallFetch(url, options);
+  if (response.status === 429) {
+    const error = new Error("Scryfall is rate limiting requests. Please wait a moment before searching again.");
+    error.status = response.status;
+    throw error;
+  }
+  if (!response.ok) {
+    const error = new Error(response.status === 404 ? "No cards found." : "Scryfall request failed.");
+    error.status = response.status;
+    throw error;
+  }
+
+  const payload = await response.json();
+  if (cacheKey) {
+    scryfallResponseCache.set(cacheKey, payload);
+  }
+  return payload;
 }
 
 function getSetFilterQuery() {
@@ -1026,13 +1078,7 @@ async function loadSets() {
   if (setsLoaded) return allSets;
   if (setLoadPromise) return setLoadPromise;
 
-  setLoadPromise = fetch("https://api.scryfall.com/sets", { headers: scryfallHeaders() })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Set list failed to load.");
-      }
-      return response.json();
-    })
+  setLoadPromise = scryfallJson("https://api.scryfall.com/sets")
     .then((payload) => {
       allSets = payload.data
         .map((set) => ({
@@ -1110,7 +1156,6 @@ async function searchScryfall(query) {
   searchMeta.textContent = "Searching Scryfall...";
 
   try {
-    const headers = scryfallHeaders();
     const setFilter = getSetFilterQuery();
     const cardQuery = [trimmed, setFilter].filter(Boolean).join(" ");
     const searchUrl = new URL("https://api.scryfall.com/cards/search");
@@ -1121,25 +1166,32 @@ async function searchScryfall(query) {
     const exactUrl = new URL("https://api.scryfall.com/cards/named");
     exactUrl.searchParams.set("exact", trimmed);
 
-    const [response, exactResponse] = await Promise.all([
-      fetch(searchUrl, {
-        headers,
+    const [searchResult, exactCard] = await Promise.all([
+      scryfallJson(searchUrl, {
         signal: searchController.signal,
-      }),
+      }).then(
+        (payload) => ({ ok: true, payload }),
+        (error) => ({ ok: false, error }),
+      ),
       setFilter
         ? Promise.resolve(null)
-        : fetch(exactUrl, {
-            headers,
+        : scryfallJson(exactUrl, {
             signal: searchController.signal,
-          }).catch(() => null),
+          }).catch((error) => {
+            if (error.name === "AbortError" || error.status === 429) throw error;
+            return null;
+          }),
     ]);
 
-    if (!response.ok && !exactResponse?.ok) {
-      throw new Error(response.status === 404 ? "No cards found." : "Scryfall search failed.");
+    if (searchResult.error?.status === 429) {
+      throw searchResult.error;
     }
 
-    const exactCard = exactResponse?.ok ? await exactResponse.json() : null;
-    const payload = response.ok ? await response.json() : { data: [], total_cards: exactCard ? 1 : 0 };
+    if (!searchResult.ok && !exactCard) {
+      throw searchResult.error;
+    }
+
+    const payload = searchResult.ok ? searchResult.payload : { data: [], total_cards: exactCard ? 1 : 0 };
     const exactSearchMatch = payload.data.find((card) => card.name.toLowerCase() === trimmed.toLowerCase());
     const orderedCards = exactCard
       ? [exactCard, ...payload.data.filter((card) => card.id !== exactCard.id)]
